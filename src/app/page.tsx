@@ -1,7 +1,22 @@
+'use client'
+
 import Image from "next/image";
 import styles from "./page.module.css";
+import AuthService from "@/domain/services/AuthService";
+import { redirect, useRouter } from "next/navigation";
+import { useLayoutEffect } from "react";
 
 export default function Home() {
+  const authService = new AuthService()
+  const router = useRouter()
+
+  useLayoutEffect(() => {
+    const isAuth = authService.isAuthenticated();
+    if(!isAuth){
+      redirect("/login")
+    }
+  }, [])
+  
   return (
     <main className={styles.main}>
       <div className={styles.description}>
