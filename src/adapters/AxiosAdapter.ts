@@ -30,17 +30,12 @@ export default class AxiosAdapter implements HttpAdapter {
     }
   }
 
-  // Adicione métodos para outros tipos de requisição conforme necessário
-
   private handleAxiosError(error: AxiosError | any) {
     if (error.response) {
-      // O servidor respondeu com um status de erro
       console.error('Erro na resposta do servidor:', error.response.data);
     } else if (error.request) {
-      // A requisição foi feita, mas não houve resposta do servidor
       console.error('Sem resposta do servidor:', error.request);
     } else {
-      // Erro durante a configuração da requisição
       console.error('Erro na configuração da requisição:', error.message);
     }
   }

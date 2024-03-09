@@ -15,6 +15,10 @@ export default class AuthService implements AuthPort {
     return await this.httpAdapter.post<LoginResponse, LoginCredentialsModel>(`${this.baseUser}/sign_in`, credentials);
   }
 
+  async getSession(): Promise<any> {
+    return await this.httpAdapter.get(`${this.baseUser}/users/tokens/info`)
+  }
+
   setUser(loginResponse: LoginResponse): void {
     localStorage.setItem('token', loginResponse.token)
   }
