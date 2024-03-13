@@ -8,7 +8,6 @@ import { useLayoutEffect } from "react";
 
 export default function Home() {
   const authService = new AuthService()
-  const router = useRouter()
 
   useLayoutEffect(() => {
     const isAuth = authService.isAuthenticated();

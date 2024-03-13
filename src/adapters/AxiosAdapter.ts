@@ -3,10 +3,20 @@ import HttpAdapter from './HttpAdapter';
 
 export default class AxiosAdapter implements HttpAdapter {
   private axiosInstance;
+  private urlLogin = '/users/tokens/sign_in';
 
   constructor() {
     this.axiosInstance = axios.create({
       baseURL: 'https://med-system-backend.onrender.com/',
+    });
+
+    this.axiosInstance.interceptors.request.use(config => {
+      if (config.url !== this.urlLogin) {
+        config.headers.Authorization = `Bearer ${JSON.parse(localStorage.getItem('user')!).token}`;
+      }
+      return config;
+    }, error => {
+      return Promise.reject(error);
     });
   }
 
