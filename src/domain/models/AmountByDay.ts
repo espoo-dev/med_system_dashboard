@@ -6,6 +6,7 @@ interface EventProcedureDayQt {
 export interface PayloadAmountByDay {
   start_date: string;
   end_date: string;
+  user_id?: number;
 }
 
 export default interface AmountByDay {
