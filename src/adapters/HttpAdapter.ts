@@ -1,5 +1,5 @@
 interface HttpAdapter {
-  get<T>(url: string): Promise<T>;
+  get<Response>(url: string, params?: unknown): Promise<Response>;
   post<Response, Payload>(url: string, data?: Payload): Promise<Response>;
 }
 

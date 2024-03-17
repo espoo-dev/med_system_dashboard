@@ -1,6 +1,10 @@
 import axios, { AxiosResponse, AxiosError } from 'axios';
 import HttpAdapter from './HttpAdapter';
 
+enum HTTP_RESPONSE_CODE {
+  Unauthorized = 401
+};
+
 export default class AxiosAdapter implements HttpAdapter {
   private axiosInstance;
   private urlLogin = '/users/tokens/sign_in';
@@ -20,9 +24,9 @@ export default class AxiosAdapter implements HttpAdapter {
     });
   }
 
-  async get<T>(url: string): Promise<T> {
+  async get<T>(url: string, params?: unknown): Promise<T> {
     try {
-      const response: AxiosResponse<T> = await this.axiosInstance.get(url);
+      const response: AxiosResponse<T> = await this.axiosInstance.get(url, { params });
       return response.data;
     } catch (error) {
       this.handleAxiosError(error);
@@ -40,9 +44,13 @@ export default class AxiosAdapter implements HttpAdapter {
     }
   }
 
-  private handleAxiosError(error: AxiosError | any) {
+  private handleAxiosError(error: AxiosError | any) {    
     if (error.response) {
       console.error('Erro na resposta do servidor:', error.response.data);
+
+      if (error.response.status === HTTP_RESPONSE_CODE.Unauthorized) {
+        // window.location.href = '/login';
+      }
     } else if (error.request) {
       console.error('Sem resposta do servidor:', error.request);
     } else {
