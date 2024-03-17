@@ -6,15 +6,107 @@ import AuthService from "@/domain/services/AuthService";
 import { redirect } from "next/navigation";
 import { useLayoutEffect } from "react";
 import DashboardService from "@/domain/services/DashboardService";
+import ApexCharts from 'apexcharts';
 
 export default function Home() {
   const authService = new AuthService();
   const dashboardService = new DashboardService();
+  const amoutProceduresChart = 'area-chart';
 
   const loadIndicators = async (): Promise<void> => {
-    const amountByDay = await dashboardService.getAmountByDay({start_date: '01/03/2024', end_date: '30/03/2024'});
-    console.log('amountByDay ->', amountByDay);
+    const amountByDay = await dashboardService.getAmountByDay(
+      {
+        start_date: '01/03/2024',
+        end_date: '30/03/2024'
+      }
+    );
+    const chartOnScreen = document.getElementById(amoutProceduresChart);
+
+    if (chartOnScreen && typeof ApexCharts !== 'undefined') {
+      const chart = new ApexCharts(chartOnScreen, 
+        {
+          chart: {
+            type: 'bar'
+          },
+          series: [{
+            name: 'Events Procedures',
+            data: Object.values(amountByDay.days)
+          }],
+          xaxis: {
+            categories: Object.keys(amountByDay.days)
+          }
+        }
+      );
+      chart.render();
+    }
   }
+
+  // const options =  {
+  //   chart: {
+  //     height: "100%",
+  //     maxWidth: "100%",
+  //     type: "area",
+  //     fontFamily: "Inter, sans-serif",
+  //     dropShadow: {
+  //       enabled: false,
+  //     },
+  //     toolbar: {
+  //       show: false,
+  //     },
+  //   },
+  //   tooltip: {
+  //     enabled: true,
+  //     x: {
+  //       show: false,
+  //     },
+  //   },
+  //   fill: {
+  //     type: "gradient",
+  //     gradient: {
+  //       opacityFrom: 0.55,
+  //       opacityTo: 0,
+  //       shade: "#1C64F2",
+  //       gradientToColors: ["#1C64F2"],
+  //     },
+  //   },
+  //   dataLabels: {
+  //     enabled: false,
+  //   },
+  //   stroke: {
+  //     width: 6,
+  //   },
+  //   grid: {
+  //     show: false,
+  //     strokeDashArray: 4,
+  //     padding: {
+  //       left: 2,
+  //       right: 2,
+  //       top: 0
+  //     },
+  //   },
+  //   series: [
+  //     {
+  //       name: "New users",
+  //       data: [6500, 6418, 6456, 6526, 6356, 6456],
+  //       color: "#1A56DB",
+  //     },
+  //   ],
+  //   xaxis: {
+  //     categories: ['01 February', '02 February', '03 February', '04 February', '05 February', '06 February', '07 February'],
+  //     labels: {
+  //       show: false,
+  //     },
+  //     axisBorder: {
+  //       show: false,
+  //     },
+  //     axisTicks: {
+  //       show: false,
+  //     },
+  //   },
+  //   yaxis: {
+  //     show: false,
+  //   },
+  // }
 
   useLayoutEffect(() => {
     const isAuth = authService.isAuthenticated();
@@ -27,6 +119,7 @@ export default function Home() {
   
   return (
     <main className={styles.main}>
+      <div id={amoutProceduresChart} style={{width: '700px'}}></div>
       <div className={styles.description}>
         <p>
           Get started by editing&nbsp;

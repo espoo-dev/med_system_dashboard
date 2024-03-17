@@ -45,13 +45,13 @@ export default function Login() {
         <form onSubmit={handleSubmit(onSubmit)} style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
           <div style={{display: 'flex', flexDirection: 'column'}}>
             <label htmlFor="username">Usuário</label>
-            <input {...register("email")} value={'roandersonfelipe@gmail.com'} />
+            <input {...register("email")} value={'edimossilva@gmail.com'} />
             {/* {errors.username && <p>{errors.username.message}</p>} */}
           </div>
 
           <div style={{display: 'flex', flexDirection: 'column'}}>
             <label htmlFor="password">Senha</label>
-            <input {...register("password")} value={'R7r12345'} />
+            <input {...register("password")} value={'edimossilva@gmail.com'} />
             {/* {errors.password && <p>{errors.password.message}</p>} */}
           </div>
 
