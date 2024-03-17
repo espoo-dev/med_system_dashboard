@@ -4,22 +4,28 @@ import Image from "next/image";
 import styles from "./page.module.css";
 import AuthService from "@/domain/services/AuthService";
 import { redirect } from "next/navigation";
-import { useLayoutEffect } from "react";
+import { useLayoutEffect, useState } from "react";
 import DashboardService from "@/domain/services/DashboardService";
 import ApexCharts from 'apexcharts';
+import SelectInput, { SelectOption } from "@/components/select/select.component";
+import { PayloadAmountByDay } from "@/domain/models/AmountByDay";
+import UserService from "@/domain/services/UserService";
+import UserModel from "@/domain/models/UserModel";
 
 export default function Home() {
   const authService = new AuthService();
   const dashboardService = new DashboardService();
+  const userService = new UserService();
   const amoutProceduresChart = 'area-chart';
+  const [users, setUsers] = useState<SelectOption[]>();
 
-  const loadIndicators = async (): Promise<void> => {
-    const amountByDay = await dashboardService.getAmountByDay(
-      {
-        start_date: '01/03/2024',
-        end_date: '30/03/2024'
-      }
-    );
+  const eventsProceduresFilterMock: PayloadAmountByDay = {
+    start_date: '01/03/2024',
+    end_date: '30/03/2024'
+  };
+
+  const loadIndicators = async (filter?: PayloadAmountByDay): Promise<void> => {
+    const amountByDay = await dashboardService.getAmountByDay(filter || eventsProceduresFilterMock);
     const chartOnScreen = document.getElementById(amoutProceduresChart);
 
     if (chartOnScreen && typeof ApexCharts !== 'undefined') {
@@ -39,7 +45,7 @@ export default function Home() {
       );
       chart.render();
     }
-  }
+  };
 
   // const options =  {
   //   chart: {
@@ -114,12 +120,41 @@ export default function Home() {
       redirect("/login");
     }
 
+    loadUsers();
     loadIndicators();
   }, []);
+
+  const handleSelectUserChange = (userId: string | number) => {
+    let filter = {
+      ...eventsProceduresFilterMock
+    };
+
+    if (userId) {
+      filter.user_id = Number(userId)
+    }
+    loadIndicators(filter);
+  };
+
+  const loadUsers = async () => {
+    const users = await userService.listUsers();
+    setUsers(users.map((user: UserModel) => {
+      return {
+        label: user.email,
+        value: user.id
+      }
+    }));
+  }
   
   return (
     <main className={styles.main}>
+      <SelectInput 
+        label="Usuário"
+        options={users as SelectOption[]}
+        onChange={handleSelectUserChange}
+      />
+
       <div id={amoutProceduresChart} style={{width: '700px'}}></div>
+
       <div className={styles.description}>
         <p>
           Get started by editing&nbsp;
