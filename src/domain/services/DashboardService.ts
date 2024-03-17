@@ -12,7 +12,7 @@ export default class DashboardService implements DashboardPort {
   }
 
   async getAmountByDay(filter: PayloadAmountByDay): Promise<AmountByDay> {
-    return await this.httpAdapter.get(`${this.baseUser}/amount_by_day`);
+    return await this.httpAdapter.get(`${this.baseUser}/amount_by_day`, filter);
   }
 }
 

@@ -3,18 +3,27 @@
 import Image from "next/image";
 import styles from "./page.module.css";
 import AuthService from "@/domain/services/AuthService";
-import { redirect, useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 import { useLayoutEffect } from "react";
+import DashboardService from "@/domain/services/DashboardService";
 
 export default function Home() {
-  const authService = new AuthService()
+  const authService = new AuthService();
+  const dashboardService = new DashboardService();
+
+  const loadIndicators = async (): Promise<void> => {
+    const amountByDay = await dashboardService.getAmountByDay({start_date: '01/03/2024', end_date: '30/03/2024'});
+    console.log('amountByDay ->', amountByDay);
+  }
 
   useLayoutEffect(() => {
     const isAuth = authService.isAuthenticated();
     if(!isAuth){
-      redirect("/login")
+      redirect("/login");
     }
-  }, [])
+
+    loadIndicators();
+  }, []);
   
   return (
     <main className={styles.main}>
