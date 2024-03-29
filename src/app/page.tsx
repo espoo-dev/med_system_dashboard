@@ -4,20 +4,26 @@ import Image from "next/image";
 import styles from "./page.module.css";
 import AuthService from "@/domain/services/AuthService";
 import { redirect } from "next/navigation";
-import { useLayoutEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import DashboardService from "@/domain/services/DashboardService";
 import ApexCharts from 'apexcharts';
 import SelectInput, { SelectOption } from "@/components/select/select.component";
 import { PayloadAmountByDay } from "@/domain/models/AmountByDay";
 import UserService from "@/domain/services/UserService";
 import UserModel from "@/domain/models/UserModel";
+import { BarChart, BarChartConfig } from "@/components/charts/apex-charts";
 
 export default function Home() {
   const authService = new AuthService();
   const dashboardService = new DashboardService();
   const userService = new UserService();
-  const amoutProceduresChart = 'area-chart';
   const [users, setUsers] = useState<SelectOption[]>();
+
+  const [chartData, setChartData] = useState<BarChartConfig>({
+    categories: [],
+    seriesData: []
+  });
+
 
   const eventsProceduresFilterMock: PayloadAmountByDay = {
     start_date: '01/03/2024',
@@ -26,93 +32,12 @@ export default function Home() {
 
   const loadIndicators = async (filter?: PayloadAmountByDay): Promise<void> => {
     const amountByDay = await dashboardService.getAmountByDay(filter || eventsProceduresFilterMock);
-    const chartOnScreen = document.getElementById(amoutProceduresChart);
 
-    if (chartOnScreen && typeof ApexCharts !== 'undefined') {
-      const chart = new ApexCharts(chartOnScreen, 
-        {
-          chart: {
-            type: 'bar'
-          },
-          series: [{
-            name: 'Events Procedures',
-            data: Object.values(amountByDay.days)
-          }],
-          xaxis: {
-            categories: Object.keys(amountByDay.days)
-          }
-        }
-      );
-      chart.render();
-    }
+    setChartData({
+      categories: Object.keys(amountByDay.days).map(date => String(date)),
+      seriesData: Object.values(amountByDay.days).map(serie => Number(serie))
+    })
   };
-
-  // const options =  {
-  //   chart: {
-  //     height: "100%",
-  //     maxWidth: "100%",
-  //     type: "area",
-  //     fontFamily: "Inter, sans-serif",
-  //     dropShadow: {
-  //       enabled: false,
-  //     },
-  //     toolbar: {
-  //       show: false,
-  //     },
-  //   },
-  //   tooltip: {
-  //     enabled: true,
-  //     x: {
-  //       show: false,
-  //     },
-  //   },
-  //   fill: {
-  //     type: "gradient",
-  //     gradient: {
-  //       opacityFrom: 0.55,
-  //       opacityTo: 0,
-  //       shade: "#1C64F2",
-  //       gradientToColors: ["#1C64F2"],
-  //     },
-  //   },
-  //   dataLabels: {
-  //     enabled: false,
-  //   },
-  //   stroke: {
-  //     width: 6,
-  //   },
-  //   grid: {
-  //     show: false,
-  //     strokeDashArray: 4,
-  //     padding: {
-  //       left: 2,
-  //       right: 2,
-  //       top: 0
-  //     },
-  //   },
-  //   series: [
-  //     {
-  //       name: "New users",
-  //       data: [6500, 6418, 6456, 6526, 6356, 6456],
-  //       color: "#1A56DB",
-  //     },
-  //   ],
-  //   xaxis: {
-  //     categories: ['01 February', '02 February', '03 February', '04 February', '05 February', '06 February', '07 February'],
-  //     labels: {
-  //       show: false,
-  //     },
-  //     axisBorder: {
-  //       show: false,
-  //     },
-  //     axisTicks: {
-  //       show: false,
-  //     },
-  //   },
-  //   yaxis: {
-  //     show: false,
-  //   },
-  // }
 
   useLayoutEffect(() => {
     const isAuth = authService.isAuthenticated();
@@ -153,7 +78,9 @@ export default function Home() {
         onChange={handleSelectUserChange}
       />
 
-      <div id={amoutProceduresChart} style={{width: '700px'}}></div>
+      <div style={{width: '100%'}}>
+        <BarChart data={chartData} onDataUpdate={setChartData} />
+      </div>
 
       <div className={styles.description}>
         <p>
