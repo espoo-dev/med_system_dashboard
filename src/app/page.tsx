@@ -60,14 +60,20 @@ export default function Home() {
   }, []);
 
   const handleSelectUserChange = (userId: string | number) => {
-    let filter = {
-      ...eventsProceduresFilterMock
+    let newFilter: DashboardFilter = {
+      ...eventsProceduresFilterMock,
+      start_date: formatDate(filter.start_date),
+      end_date: formatDate(filter.end_date)
     };
 
     if (userId) {
-      filter.user_id = Number(userId)
+      newFilter.user_id = Number(userId);
+      setFilter({
+        ...filter,
+        user_id: Number(userId)
+      });
     }
-    loadIndicators(filter);
+    loadIndicators(newFilter);
   };
 
   const loadUsers = async () => {
@@ -100,8 +106,9 @@ export default function Home() {
             });
 
             loadIndicators({
-              ...eventsProceduresFilterMock,
-              start_date: formatDate(monthSelected.target.value)
+              ...filter,
+              start_date: formatDate(monthSelected.target.value),
+              end_date: formatDate(filter.end_date)
             });
         }} />
 
@@ -116,7 +123,8 @@ export default function Home() {
             });
 
             loadIndicators({
-              ...eventsProceduresFilterMock,
+              ...filter,
+              start_date: formatDate(filter.start_date),
               end_date: formatDate(monthSelected.target.value)
             });
         }} />
