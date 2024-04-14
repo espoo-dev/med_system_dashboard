@@ -4,20 +4,25 @@ import Image from "next/image";
 import styles from "./page.module.css";
 import AuthService from "@/domain/services/AuthService";
 import { redirect } from "next/navigation";
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import DashboardService from "@/domain/services/DashboardService";
-import ApexCharts from 'apexcharts';
 import SelectInput, { SelectOption } from "@/components/select/select.component";
 import { PayloadAmountByDay } from "@/domain/models/AmountByDay";
 import UserService from "@/domain/services/UserService";
 import UserModel from "@/domain/models/UserModel";
 import { BarChart, BarChartConfig } from "@/components/charts/apex-charts";
 
+interface DashboardFilter extends PayloadAmountByDay {}
+
 export default function Home() {
   const authService = new AuthService();
   const dashboardService = new DashboardService();
   const userService = new UserService();
   const [users, setUsers] = useState<SelectOption[]>();
+  const [filter, setFilter] = useState<DashboardFilter>({
+    start_date: '2024-03-01',
+    end_date: '2024-03-30'
+  });
 
   const [chartData, setChartData] = useState<BarChartConfig>({
     categories: [],
@@ -29,6 +34,11 @@ export default function Home() {
     start_date: '01/03/2024',
     end_date: '30/03/2024'
   };
+
+  const formatDate = (date: string): string => {
+    const startDateParts = date.split('-');
+    return `${startDateParts[2]}/${startDateParts[1]}/${startDateParts[0]}`;
+  }
 
   const loadIndicators = async (filter?: PayloadAmountByDay): Promise<void> => {
     const amountByDay = await dashboardService.getAmountByDay(filter || eventsProceduresFilterMock);
@@ -77,6 +87,40 @@ export default function Home() {
         options={users as SelectOption[]}
         onChange={handleSelectUserChange}
       />
+
+      <div style={{display: 'flex', gap: '8px'}}>
+        <input type="date"
+          id="start"
+          name="start"
+          value={filter.start_date}
+          onChange={(monthSelected) => {
+            setFilter({
+              ...filter,
+              start_date: monthSelected.target.value
+            });
+
+            loadIndicators({
+              ...eventsProceduresFilterMock,
+              start_date: formatDate(monthSelected.target.value)
+            });
+        }} />
+
+        <input type="date"
+          id="end"
+          name="end"
+          value={filter.end_date}
+          onChange={(monthSelected) => {
+            setFilter({
+              ...filter,
+              end_date: monthSelected.target.value
+            });
+
+            loadIndicators({
+              ...eventsProceduresFilterMock,
+              end_date: formatDate(monthSelected.target.value)
+            });
+        }} />
+      </div>
 
       <div style={{width: '100%'}}>
         <BarChart data={chartData} onDataUpdate={setChartData} />
